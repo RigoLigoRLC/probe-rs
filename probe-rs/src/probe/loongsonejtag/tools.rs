@@ -82,15 +82,15 @@ pub fn open_device_from_selector(
 ) -> Result<LoongsonEjtagDevice, ProbeCreationError> {
     tracing::trace!("Attempting to open device matching {}", selector);
 
-    let mut device_info = None;
+    let mut _device_info = None;
     if let Ok(devices) = nusb::list_devices() {
         for device in devices {
             tracing::trace!("Trying device {:?}", device);
 
             if selector.matches(&device) {
-                device_info = get_loongson_ejtag_info(&device);
+                _device_info = get_loongson_ejtag_info(&device);
 
-                if device_info.is_some() {
+                if _device_info.is_some() {
                     if let Some(device) = open_device(&device) {
                         return Ok(device)
                     }

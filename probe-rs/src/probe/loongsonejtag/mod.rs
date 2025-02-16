@@ -6,11 +6,9 @@ mod tools;
 use std::cmp::min;
 use std::fmt::{Debug, Formatter};
 use std::time::Duration;
-use test_log::tracing_subscriber::fmt;
 use probe_rs_target::ScanChainElement;
 use crate::Error;
 use crate::probe::{DebugProbe, DebugProbeError, DebugProbeInfo, DebugProbeSelector, ProbeCreationError, ProbeFactory, WireProtocol};
-use crate::probe::loongsonejtag::commands::Command;
 use crate::probe::loongsonejtag::commands::get_firmware_version::GetFirmwareVersionCommand;
 use crate::probe::loongsonejtag::commands::probe_memory_rw::{ProbeMemoryRWCommand, LSEJTAG_ADDR_REG_CLOCK_DIV};
 use crate::probe::loongsonejtag::tools::{list_loongsonejtag_devices, LSEJTAG_IN_EP, LSEJTAG_OUT_EP};
@@ -18,6 +16,7 @@ use crate::probe::usb_util::InterfaceExt;
 
 const USB_TIMEOUT: Duration = Duration::from_millis(1000);
 
+/// Errors occured when sending command to the probe
 #[derive(Debug, thiserror::Error, docsplay::Display)]
 pub enum SendError {
     /// Error in the USB access.
@@ -44,7 +43,9 @@ impl From<std::io::Error> for SendError {
 pub struct LoongsonEjtagFactory;
 
 impl std::fmt::Display for LoongsonEjtagFactory {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { f.write_str("LoongsonEjtag") }
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.write_str("Loongson EJTAG")
+    }
 }
 
 impl ProbeFactory for LoongsonEjtagFactory {
@@ -70,6 +71,7 @@ pub struct LoongsonEjtag {
 }
 
 impl LoongsonEjtag {
+    /// Try creating a new Loongson EJTAG probe from an open device
     pub fn new_from_device(mut device: LoongsonEjtagDevice) -> Result<Self, DebugProbeError> {
         // Drain all remaining data from the device
         device.drain();
@@ -177,7 +179,7 @@ impl DebugProbe for LoongsonEjtag {
     }
 }
 
-struct LoongsonEjtagDevice {
+pub struct LoongsonEjtagDevice {
     handle: nusb::Interface,
 
     max_packet_size: usize,
